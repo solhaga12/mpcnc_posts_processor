@@ -16,10 +16,9 @@ Some design points:
 
 // user-defined properties
 properties = {
-  cutterOnThrough: "M106 S200",     // GCode command to turn on the laser/plasma cutter in through mode
-  cutterOnEtch: "M106 S100",        // GCode command to turn on the laser/plasma cutter in etch mode
-  cutterOnVaporize: "M106 S255",    // GCode command to turn on the laser/plasma cutter in vaporize mode
+  cutterOnThc: "M106 S125",         // GCode command to turn with THC voltage
   cutterOff: "M107",                // Gcode command to turn off the laser/plasma cutter
+  feed: 4000,
   travelSpeedXY: 2500,              // High speed for travel movements X & Y (mm/min)
   travelSpeedZ: 300,                // High speed for travel movements Z (mm/min)
   setOriginOnStart: true,           // Set origin when gcode start (G92)
@@ -38,8 +37,8 @@ properties = {
 // Internal properties
 extension = "gcode";
 setCodePage("ascii");
-capabilities = CAPABILITY_MILLING | CAPABILITY_JET;
-description = "MPCNC Milling and Laser/Plasma cutter";
+capabilities = CAPABILITY_JET;
+description = "MPCNC Plasma cutter";
 
 // Formats
 var xyzFormat = createFormat({decimals:3});
@@ -122,26 +121,9 @@ function onSection() {
   }
 
   // Machining type
-  if(currentSection.type == TYPE_MILLING) {
-    // Specific milling code
-    writeComment(sectionComment + " - Milling - Tool: " + tool.number + " - " + getToolTypeName(tool.type));
-  }
-
   if(currentSection.type == TYPE_JET) {
     // Cutter mode used for different cutting power in PWM laser
-      switch (currentSection.jetMode) {
-      case JET_MODE_THROUGH:
-        cutterOn = properties.cutterOnThrough;
-        break;
-      case JET_MODE_ETCHING:
-        cutterOn = properties.cutterOnEtch;
-        break;
-      case JET_MODE_VAPORIZE:
-        cutterOn = properties.cutterOnVaporize;
-        break;
-      default:
-        error("Cutting mode is not supported.");
-    }
+	cutterOn = properties.cutterOnThc;
     writeComment(sectionComment + " - Laser/Plasma - Cutting mode: " + getParameter("operation:cuttingMode"));
   }
 
