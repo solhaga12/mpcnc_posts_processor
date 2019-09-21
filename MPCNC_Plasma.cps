@@ -18,7 +18,7 @@ Some design points:
 properties = {
   cutterOnThc: "M106 S125",         // GCode command to turn with THC voltage
   cutterOff: "M107",                // Gcode command to turn off the laser/plasma cutter
-  feed: 4000,
+  feedSpeed: 4000,	      			// Feed speed in mm/minute
   travelSpeedXY: 2500,              // High speed for travel movements X & Y (mm/min)
   travelSpeedZ: 300,                // High speed for travel movements Z (mm/min)
   setOriginOnStart: true,           // Set origin when gcode start (G92)
@@ -27,11 +27,11 @@ properties = {
   gcodeStopFile: "",                // File with custom Gcode for footer/end (in nc folder)
   gcodeToolFile: "",                // File with custom Gcode for tool change (in nc folder)
   gcodeProbeFile: "",               // File with custom Gcode for tool probe (in nc folder)
-  toolChangeEnabled: true,          // Enable tool change code (bultin tool change requires LCD display)
+  toolChangeEnabled: false,          // Enable tool change code (bultin tool change requires LCD display)
   toolChangeXY: "X0 Y0",            // X&Y position for builtin tool change
   toolChangeZ: "Z30",               // Z position for builtin tool change
   toolChangeZProbe: true,           // Z probe after tool change
-  probeOnStart: true                // Execute probe gcode to align tool
+  probeOnStart: false                // Execute probe gcode to align tool
 };
 
 // Internal properties
@@ -240,7 +240,7 @@ function linearMovements(_x, _y, _z, _feed) {
   var x = xOutput.format(_x);
   var y = yOutput.format(_y);
   var z = zOutput.format(_z);
-  var f = fOutput.format(_feed);
+  var f = fOutput.format(properties.feedSpeed);
   if(x || y || z) {
     writeln("G1" + x + y + z + f);
   }
@@ -254,7 +254,7 @@ function circularMovements(_clockwise, _cx, _cy, _cz, _x,	_y, _z, _feed) {
   case PLANE_XY:
     var x = xOutput.format(_x);
     var y = yOutput.format(_y);
-    var f = fOutput.format(_feed);
+    var f = fOutput.format(properties.feedSpeed);
     var start	=	getCurrentPosition();
     var i = iOutput.format(_cx - start.x, 0);
     var j = jOutput.format(_cy - start.y, 0);
