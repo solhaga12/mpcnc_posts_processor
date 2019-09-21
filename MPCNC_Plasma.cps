@@ -16,10 +16,11 @@ Some design points:
 
 // user-defined properties
 properties = {
-  cutterOnThc: "M106 S125",         // GCode command to turn with THC voltage
+  cutterOn:  "M106",                // GCode command to turn with THC voltage
+  _thcVoltage: 125,					// Set the S<thcVoltage> M106 parameter
   cutterOff: "M107",                // Gcode command to turn off the laser/plasma cutter
-  feedSpeed: 4000,	      			// Feed speed in mm/minute
-  travelSpeedXY: 2500,              // High speed for travel movements X & Y (mm/min)
+  _feedSpeed: 4000,	      			// Feed speed in mm/minute
+  _travelSpeedXY: 2500,             // High speed for travel movements X & Y (mm/min)
   travelSpeedZ: 300,                // High speed for travel movements Z (mm/min)
   setOriginOnStart: true,           // Set origin when gcode start (G92)
   goOriginOnFinish: true,           // Go X0 Y0 Z0 at gcode end
@@ -83,8 +84,8 @@ function onClose() {
 
   if(properties.gcodeStopFile == "") {
     if(properties.goOriginOnFinish) {
-      writeln("G1 X0 Y0" + fOutput.format(properties.travelSpeedXY)); // Go to XY origin
-      writeln("G1 Z0" + fOutput.format(properties.travelSpeedZ)); // Go to Z origin
+      writeln("G1 X0 Y0" + fOutput.format(properties._travelSpeedXY)); // Go to XY origin
+      writeln("G1 Z15" + fOutput.format(properties.travelSpeedZ)); // Go to Z origin
     }
   } else {
     loadFile(properties.gcodeStopFile);
@@ -122,9 +123,9 @@ function onSection() {
 
   // Machining type
   if(currentSection.type == TYPE_JET) {
-    // Cutter mode used for different cutting power in PWM laser
-	cutterOn = properties.cutterOnThc;
-    writeComment(sectionComment + " - Laser/Plasma - Cutting mode: " + getParameter("operation:cuttingMode"));
+    // Cutter mode used for different thc voltages
+	cutterOn = properties.cutterOn + " S" + properties._thcVoltage;
+    writeComment(sectionComment + " - Plasma - Cutting mode: " + getParameter("operation:cuttingMode"));
   }
 
   // Print min/max boundaries for each section
@@ -228,7 +229,7 @@ function rapidMovements(_x, _y, _z) {
     writeln("G1" + z + f);
   }
   if(x || y) {
-    f = fOutput.format(properties.travelSpeedXY);
+    f = fOutput.format(properties._travelSpeedXY);
     fOutput.reset();
     writeln("G1" + x + y + f);
   }
@@ -240,7 +241,7 @@ function linearMovements(_x, _y, _z, _feed) {
   var x = xOutput.format(_x);
   var y = yOutput.format(_y);
   var z = zOutput.format(_z);
-  var f = fOutput.format(properties.feedSpeed);
+  var f = fOutput.format(properties._feedSpeed);
   if(x || y || z) {
     writeln("G1" + x + y + z + f);
   }
@@ -254,7 +255,7 @@ function circularMovements(_clockwise, _cx, _cy, _cz, _x,	_y, _z, _feed) {
   case PLANE_XY:
     var x = xOutput.format(_x);
     var y = yOutput.format(_y);
-    var f = fOutput.format(properties.feedSpeed);
+    var f = fOutput.format(properties._feedSpeed);
     var start	=	getCurrentPosition();
     var i = iOutput.format(_cx - start.x, 0);
     var j = jOutput.format(_cy - start.y, 0);
@@ -286,7 +287,7 @@ function toolChange() {
       writeln("G1 " + properties.toolChangeZ + fOutput.format(properties.travelSpeedZ));
     }
     if(properties.toolChangeXY != "") {
-      writeln("G1 " + properties.toolChangeXY + fOutput.format(properties.travelSpeedXY));
+      writeln("G1 " + properties.toolChangeXY + fOutput.format(properties._travelSpeedXY));
     }
 
     // Disable Z stepper
