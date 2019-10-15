@@ -17,7 +17,10 @@ Some design points:
 // user-defined properties
 properties = {
   cutterOn:  "M106",                // GCode command to turn with THC voltage
-  _thcVoltage: 125,					// Set the S<thcVoltage> M106 parameter
+  _thcVoltage: 125,					// Set the V<thcVoltage> in V. M106 parameter
+  _delay: 100,						// Set the D<delayTime> in ms. M106 parameter
+  _cutHeight: 6.4,					// Set the H<cutHeight> in mm. M106 parameter
+  _initialHeight: 6.4,				// Set the I<initialHeight> in mm. M106 parameter
   cutterOff: "M107",                // Gcode command to turn off the laser/plasma cutter
   _feedSpeed: 4000,	      			// Feed speed in mm/minute
   _travelSpeedXY: 2500,             // High speed for travel movements X & Y (mm/min)
@@ -124,7 +127,7 @@ function onSection() {
   // Machining type
   if(currentSection.type == TYPE_JET) {
     // Cutter mode used for different thc voltages
-	cutterOn = properties.cutterOn + " S" + properties._thcVoltage;
+	cutterOn = properties.cutterOn + " V" + properties._thcVoltage + " D" + properties._delay + " H" + properties._cutHeight + " I" + properties._initialHeight;
     writeComment(sectionComment + " - Plasma - Cutting mode: " + getParameter("operation:cuttingMode"));
   }
 
