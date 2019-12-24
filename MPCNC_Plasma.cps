@@ -80,15 +80,16 @@ function onOpen() {
 
 // Called at end of gcode file
 function onClose() {
-
+  writeln(properties.cutterOff);
   // End message to LCD
   writeln("M400");
   writeln("M117 Job end");
 
   if(properties.gcodeStopFile == "") {
     if(properties.goOriginOnFinish) {
-      writeln("G1 X0 Y0" + fOutput.format(properties._travelSpeedXY)); // Go to XY origin
-      writeln("G1 Z15" + fOutput.format(properties.travelSpeedZ)); // Go to Z origin
+	  writeln("G0 Z50" + fOutput.format(properties.travelSpeedZ)); // Raise cut head.
+      writeln("G0 X0 Y0" + fOutput.format(properties._travelSpeedXY)); // Go to XY origin
+ 
     }
   } else {
     loadFile(properties.gcodeStopFile);
