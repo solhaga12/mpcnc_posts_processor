@@ -80,9 +80,9 @@ function onOpen() {
 
 // Called at end of gcode file
 function onClose() {
+  writeln("M400");
   writeln(properties.cutterOff);
 
-  writeln("M400");
   if(properties.gcodeStopFile == "") {
     if(properties.goOriginOnFinish) {
 	  writeln("G0 Z50" + fOutput.format(properties.travelSpeedZ)); // Raise cut head.
@@ -177,8 +177,10 @@ function onCircular(clockwise, cx, cy, cz, x,	y, z, feed)	{
 function onPower(power) {
   if(power != powerState) {
     if(power) {
+	  writeln("M400");
       writeln(cutterOn);
     } else {
+	  writeln("M400");
       writeln(properties.cutterOff);
     }
     powerState = power;
