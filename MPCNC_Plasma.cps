@@ -25,17 +25,6 @@ properties = {
   _feedSpeed: 4000,	      			// Feed speed in mm/minute
   _travelSpeedXY: 2500,             // High speed for travel movements X & Y (mm/min)
   travelSpeedZ: 300,                // High speed for travel movements Z (mm/min)
-  setOriginOnStart: true,           // Set origin when gcode start (G92)
-  goOriginOnFinish: true,           // Go X0 Y0 Z0 at gcode end
-  gcodeStartFile: "",               // File with custom Gcode for header/start (in nc folder)
-  gcodeStopFile: "",                // File with custom Gcode for footer/end (in nc folder)
-  gcodeToolFile: "",                // File with custom Gcode for tool change (in nc folder)
-  gcodeProbeFile: "",               // File with custom Gcode for tool probe (in nc folder)
-  toolChangeEnabled: false,          // Enable tool change code (bultin tool change requires LCD display)
-  toolChangeXY: "X0 Y0",            // X&Y position for builtin tool change
-  toolChangeZ: "Z30",               // Z position for builtin tool change
-  toolChangeZProbe: true,           // Z probe after tool change
-  probeOnStart: false                // Execute probe gcode to align tool
 };
 
 // Internal properties
@@ -83,15 +72,9 @@ function onClose() {
   writeln("M400");
   writeln(properties.cutterOff);
 
-  if(properties.gcodeStopFile == "") {
-    if(properties.goOriginOnFinish) {
-	  writeln("G0 Z50" + fOutput.format(properties.travelSpeedZ)); // Raise cut head.
-      writeln("G0 X0 Y0" + fOutput.format(properties._travelSpeedXY)); // Go to XY origin
- 
-    }
-  } else {
-    loadFile(properties.gcodeStopFile);
-  }
+  writeln("G0 Z50" + fOutput.format(properties.travelSpeedZ)); // Raise cut head.
+  writeln("G0 X0 Y0" + fOutput.format(properties._travelSpeedXY)); // Go to XY origin
+  
   // End message to LCD
   writeln("M117 Job end");
   return;
@@ -103,34 +86,16 @@ function onSection() {
   // Write Start gcode of the documment (after the "onParameters" with the global info)
   if(isFirstSection()) {
     writeln("");
-    if(properties.gcodeStartFile == "") {
-      writeln("G90"); // Set to Absolute Positioning
-      writeln("G21"); // Set Units to Millimeters
-      writeln("M84 S0"); // Disable steppers timeout
-      if(properties.setOriginOnStart) {
-        writeln("G92 X0 Y0 Z0"); // Set origin to initial position
-      }
-      writeln("");
-    } else {
-      loadFile(properties.gcodeStartFile);
-    }
-
-    if(properties.probeOnStart && tool.number != 0) {
-      probeTool();
-    }
+    writeln("G90"); // Set to Absolute Positioning
+    writeln("G21"); // Set Units to Millimeters
+    writeln("M84 S0"); // Disable steppers timeout
+    writeln("G92 X0 Y0 Z0"); // Set origin to initial position
+    writeln("");
   }
 
-  // Tool change
-  if(properties.toolChangeEnabled && !isFirstSection() && tool.number != getPreviousSection().getTool().number) {
-    toolChange();
-  }
-
-  // Machining type
-  if(currentSection.type == TYPE_JET) {
-    // Cutter mode used for different thc voltages
-	cutterOn = properties.cutterOn + " V" + properties._thcVoltage + " D" + properties._delay + " H" + properties._cutHeight + " I" + properties._initialHeight;
-    writeComment(sectionComment + " - Plasma - Cutting mode: " + getParameter("operation:cuttingMode"));
-  }
+  // Cutter mode used for different thc voltages
+  cutterOn = properties.cutterOn + " V" + properties._thcVoltage + " D" + properties._delay + " H" + properties._cutHeight + " I" + properties._initialHeight;
+  writeComment(sectionComment + " - Plasma - Cutting mode: " + getParameter("operation:cuttingMode"));
 
   // Print min/max boundaries for each section
   vectorX = new Vector(1,0,0);
@@ -194,7 +159,7 @@ function onDwell(seconds) {
   writeln("");
 }
 
-// Called with every parameter in the documment/section
+// Called with every parameter in the document/section
 function onParameter(name, value) {
 
   // Write gcode initial info
@@ -275,66 +240,4 @@ function circularMovements(_clockwise, _cx, _cy, _cz, _x,	_y, _z, _feed) {
     linearize(tolerance);
   }
   return;
-}
-
-// Tool change
-function toolChange() {
-  if(properties.gcodeToolFile == "") {
-    // Builtin tool change gcode
-    writeComment("Tool Change");
-
-    // Beep
-    writeln("M400"); // Wait movement buffer it's empty
-    writeln("M300 S400 P2000");
-
-    // Go to tool change position
-    if(properties.toolChangeZ != "") {
-      writeln("G1 " + properties.toolChangeZ + fOutput.format(properties.travelSpeedZ));
-    }
-    if(properties.toolChangeXY != "") {
-      writeln("G1 " + properties.toolChangeXY + fOutput.format(properties._travelSpeedXY));
-    }
-
-    // Disable Z stepper
-    writeln("M18 Z");
-
-    // Ask tool change and wait user to touch lcd button
-    writeln("M0 Put tool " + tool.number + " - " + getToolTypeName(tool.type));
-
-    // Run Z probe gcode
-    if(properties.toolChangeZProbe && tool.number != 0) {
-      writeComment("Z Probe gcode goes here");
-    }
-    writeln("");
-  } else {
-    // Custom tool change gcode
-    loadFile(properties.gcodeToolFile);
-  }
-}
-
-// Probe tool
-function probeTool() {
-  if(properties.gcodeProbeFile == "") {
-    writeComment("Probe tool - Not yet implemented");
-    writeln("");
-  } else {
-    loadFile(properties.gcodeProbeFile);
-  }
-}
-
-// Test if file exist/can read and load it
-function loadFile(_file) {
-  var folder = FileSystem.getFolderPath(getOutputPath()) + PATH_SEPARATOR;
-  if(FileSystem.isFile( folder + _file)) {
-    var txt = loadText( folder + _file, "utf-8");
-    if ( txt.length > 0 ) {
-      writeComment("Start custom gcode " + folder + _file);
-      write(txt);
-      writeComment("End custom gcode " + folder + _file);
-      writeln("");
-    }
-  } else {
-    writeComment("Can't open file " + folder + _file);
-    error("Can't open file " + folder + _file);
-  }
 }
