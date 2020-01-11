@@ -105,7 +105,7 @@ function onSection() {
   writeComment("Z Min: " + xyzFormat.format(currentSection.getGlobalZRange().getMinimum()) + " - Z Max: " + xyzFormat.format(currentSection.getGlobalZRange().getMaximum()));
 
   // Display section name in LCD
-  // writeln("M400");
+  writeln("M400");
   writeln("M117 " + sectionComment);
   writeln("G28 Z");
 
@@ -143,6 +143,7 @@ function onCircular(clockwise, cx, cy, cz, x,	y, z, feed)	{
 function onPower(power) {
   if(power != powerState) {
     if(power) {
+	  writeln("M400");
       writeln(cutterOn);
     } else {
 	  writeln("M400");
