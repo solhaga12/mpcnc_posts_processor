@@ -107,6 +107,7 @@ function onSection() {
   // Display section name in LCD
   // writeln("M400");
   writeln("M117 " + sectionComment);
+  writeln("G28 Z");
 
   return;
 }
