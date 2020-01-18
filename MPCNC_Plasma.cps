@@ -108,6 +108,7 @@ function onSection() {
   writeln("M400");
   writeln("M117 " + sectionComment);
   writeln("G28 Z");
+  writeln("G0 Z2");
 
   return;
 }
