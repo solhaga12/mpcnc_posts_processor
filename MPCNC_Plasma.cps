@@ -89,6 +89,7 @@ function onSection() {
     writeln("G90"); // Set to Absolute Positioning
     writeln("G21"); // Set Units to Millimeters
     writeln("M84 S0"); // Disable steppers timeout
+	writeln("G28 Z");
     writeln("G92 X0 Y0 Z0"); // Set origin to initial position
     writeln("");
   }
@@ -107,7 +108,6 @@ function onSection() {
   // Display section name in LCD
   writeln("M400");
   writeln("M117 " + sectionComment);
-  writeln("G28 Z");
   writeln("G0 Z2");
 
   return;
