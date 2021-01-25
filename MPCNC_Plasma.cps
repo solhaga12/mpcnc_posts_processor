@@ -16,12 +16,12 @@ Some design points:
 
 // user-defined properties
 properties = {
-  cutterOn:  "M106",                // GCode command to turn on the plasma
-  cutterOff: "M107",                // Gcode command to turn off the plasma
-  _thcVoltage: 125,					// Set the V<thcVoltage> in V. M106 parameter
-  _delay: 100,						// Set the D<delayTime> in ms. M106 parameter
-  _cutHeight: 6.4,					// Set the H<cutHeight> in mm. M106 parameter
-  _initialHeight: 6.4,				// Set the I<initialHeight> in mm. M106 parameter
+  cutterOn:  "M2106",                // GCode command to turn on the plasma
+  cutterOff: "M2107",                // Gcode command to turn off the plasma
+  _thcVoltage: 125,					// Set the V<thcVoltage> in V. M2106 parameter
+  _delay: 100,						// Set the D<delayTime> in ms. M2106 parameter
+  _cutHeight: 6.4,					// Set the H<cutHeight> in mm. M2106 parameter
+  _initialHeight: 6.4,				// Set the I<initialHeight> in mm. M2106 parameter
   _feedSpeed: 4000,	      			// Feed speed in mm/minute
   _travelSpeedXY: 2500,             // High speed for travel movements X & Y (mm/min)
   travelSpeedZ: 300,                // High speed for travel movements Z (mm/min)
