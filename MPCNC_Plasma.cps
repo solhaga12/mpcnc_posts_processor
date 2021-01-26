@@ -89,8 +89,8 @@ function onSection() {
     writeln("G90"); // Set to Absolute Positioning
     writeln("G21"); // Set Units to Millimeters
     writeln("M84 S0"); // Disable steppers timeout
-	writeln("G28 Z");
-    writeln("G92 X0 Y0 Z0"); // Set origin to initial position
+	writeln("G28 Z");	// Z is at 10 after homing
+    writeln("G92 X0 Y0 Z10"); // Set origin to initial position
     writeln("");
   }
 
