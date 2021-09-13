@@ -24,14 +24,16 @@ properties = {
   _initialHeight: 6.4,				// Set the I<initialHeight> in mm. M2106 parameter
   _feedSpeed: 4000,	      			// Feed speed in mm/minute
   _travelSpeedXY: 2500,             // High speed for travel movements X & Y (mm/min)
-  travelSpeedZ: 300,                // High speed for travel movements Z (mm/min)
+  travelSpeedZ: 900,                // High speed for travel movements Z (mm/min)
 };
 
 // Internal properties
 extension = "gcode";
 setCodePage("ascii");
+certificationLevel = 2;
 capabilities = CAPABILITY_JET;
 description = "CoreXY Plasma cutter";
+vendor = "Solhaga";
 
 // Formats
 var xyzFormat = createFormat({decimals:3});
@@ -88,8 +90,8 @@ function onSection() {
     writeln("");
     writeln("G90"); // Set to Absolute Positioning
     writeln("G21"); // Set Units to Millimeters
-	writeln("G28 Z");	// Z is at 10 after homing
-    writeln("G92 X0 Y0 Z10"); // Set origin to initial position
+	writeln("G28 Z");	// Z is at 4 after homing
+    writeln("G92 X0 Y0 Z4"); // Set origin to initial position
     writeln("");
   }
 
@@ -107,9 +109,7 @@ function onSection() {
   // Display section name in LCD
   writeln("M400");
   writeln("M117 " + sectionComment);
-  writeln("G0 Z2");
-
-  return;
+   return;
 }
 
 // Called in every section end
@@ -144,7 +144,7 @@ function onPower(power) {
   if(power != powerState) {
     if(power) {
 	  writeln("M400");
-	  writeln("G28 Z");	// Z is at 10 after homing
+	  writeln("G28 Z");	// Z is at 4 after homing
       writeln(cutterOn);
     } else {
 	  writeln("M400");
@@ -196,11 +196,11 @@ function rapidMovements(_x, _y, _z) {
   var y = yOutput.format(_y);
   var z = zOutput.format(_z);
 
-  if(z) {
-    f = fOutput.format(properties.travelSpeedZ);
-    fOutput.reset();
-    writeln("G1" + z + f);
-  }
+//  if(z) {
+//    f = fOutput.format(properties.travelSpeedZ);
+//    fOutput.reset();
+//    writeln("G1" + z + f);
+//  }
   if(x || y) {
     f = fOutput.format(properties._travelSpeedXY);
     fOutput.reset();
@@ -215,8 +215,10 @@ function linearMovements(_x, _y, _z, _feed) {
   var y = yOutput.format(_y);
   var z = zOutput.format(_z);
   var f = fOutput.format(properties._feedSpeed);
-  if(x || y || z) {
-    writeln("G1" + x + y + z + f);
+  //if(x || y || z) {
+  //writeln("G1" + x + y + z + f);
+  if(x || y) {
+	writeln("G1" + x + y + f);
   }
   return;
 }
