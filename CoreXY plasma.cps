@@ -32,8 +32,9 @@ extension = "gcode";
 setCodePage("ascii");
 certificationLevel = 2;
 capabilities = CAPABILITY_JET;
-description = "CoreXY Plasma cutter";
+description = "CoreXY Plasma Cutter";
 vendor = "Solhaga";
+useSmoothing = true;
 
 // Formats
 var xyzFormat = createFormat({decimals:3});
@@ -52,8 +53,8 @@ var	kOutput	=	createReferenceVariable({prefix:" K"},	xyzFormat);
 
 // Arc support variables
 minimumChordLength	=	spatial(0.01,	MM);
-minimumCircularRadius	=	spatial(0.01,	MM);
-maximumCircularRadius	=	spatial(1000,	MM);
+minimumCircularRadius	=	spatial(1,	MM);	// Same values disables IJK
+maximumCircularRadius	=	spatial(1,	MM);	// Same values disables IJK
 minimumCircularSweep	=	toRad(0.01);
 maximumCircularSweep	=	toRad(180);
 allowHelicalMoves	=	false;
@@ -62,6 +63,8 @@ allowedCircularPlanes	=	undefined;
 // Misc variables
 var powerState = false;
 var cutterOn;
+var currentXpos;
+var currentYpos;
 
 // Called in every new gcode file
 function onOpen() {
@@ -215,11 +218,15 @@ function linearMovements(_x, _y, _z, _feed) {
   var y = yOutput.format(_y);
   var z = zOutput.format(_z);
   var f = fOutput.format(properties._feedSpeed);
+  
   //if(x || y || z) {
   //writeln("G1" + x + y + z + f);
   if(x || y) {
 	writeln("G1" + x + y + f);
   }
+  currentXpos = x;
+  currentYpos = y;
+  
   return;
 }
 
