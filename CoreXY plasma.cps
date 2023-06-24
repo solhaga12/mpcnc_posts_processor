@@ -25,6 +25,7 @@ properties = {
   _feedSpeed: 4000,	      			// Feed speed in mm/minute
   _travelSpeedXY: 2500,             // High speed for travel movements X & Y (mm/min)
   travelSpeedZ: 900,                // High speed for travel movements Z (mm/min)
+  _thcSteps: 1,						// Steps to divide feed movements
 };
 
 // Internal properties
@@ -213,6 +214,7 @@ function rapidMovements(_x, _y, _z) {
 }
 
 // Linear movements
+// Divide into properties._thcSteps
 function linearMovements(_x, _y, _z, _feed) {
   var x = xOutput.format(_x);
   var y = yOutput.format(_y);
