@@ -26,6 +26,7 @@ properties = {
   _travelSpeedXY: 2500,             // High speed for travel movements X & Y (mm/min)
   travelSpeedZ: 900,                // High speed for travel movements Z (mm/min)
   _thcStepSize: 0.1,						// Step size to divide feed movements into small G1 moves
+  _thcHeightIncrement: 0.1,						// Increment to lower or lift Z-axis for every G1 move. M2106 parameter.
 };
 
 // Internal properties
@@ -54,8 +55,8 @@ var	kOutput	=	createReferenceVariable({prefix:" K"},	xyzFormat);
 
 // Arc support variables
 minimumChordLength	=	spatial(0.01,	MM);
-minimumCircularRadius	=	spatial(1,	MM);	// Same values disables IJK
-maximumCircularRadius	=	spatial(1,	MM);	// Same values disables IJK
+minimumCircularRadius	=	spatial(0.5,	MM);	// Same values disables IJK
+maximumCircularRadius	=	spatial(1.5,	MM);	// Same values disables IJK
 minimumCircularSweep	=	toRad(0.01);
 maximumCircularSweep	=	toRad(180);
 allowHelicalMoves	=	false;
@@ -94,13 +95,13 @@ function onSection() {
     writeln("");
     writeln("G90"); // Set to Absolute Positioning
     writeln("G21"); // Set Units to Millimeters
-	writeln("G28 Z");	// Z is at 4 after homing
+	  writeln("G28 Z");	// Z is at 4 after homing
     writeln("G92 X0 Y0 Z4"); // Set origin to initial position
     writeln("");
   }
 
   // Cutter mode used for different thc voltages
-  cutterOn = properties.cutterOn + " V" + properties._thcVoltage + " D" + properties._delay + " H" + properties._cutHeight + " I" + properties._initialHeight;
+  cutterOn = properties.cutterOn + " V" + properties._thcVoltage + " D" + properties._delay + " H" + properties._cutHeight + " I" + properties._initialHeight + " T" + properties._thcHeightIncrement;
   writeComment(sectionComment + " - Plasma - Cutting mode: " + getParameter("operation:cuttingMode"));
 
   // Print min/max boundaries for each section
@@ -259,6 +260,8 @@ function circularMovements(_clockwise, _cx, _cy, _cz, _x,	_y, _z, feed) {
     } else {
       writeln("G3" + x + y + i + j + f);
     }
+    currentXPos = _x;
+    currentYPos = _y;
     break;
   default:
     linearize(tolerance);
