@@ -25,7 +25,7 @@ properties = {
   _feedSpeed: 4000,	      			// Feed speed in mm/minute
   _travelSpeedXY: 2500,             // High speed for travel movements X & Y (mm/min)
   travelSpeedZ: 900,                // High speed for travel movements Z (mm/min)
-  _thcSteps: 1,						// Steps to divide feed movements
+  _thcStepSize: 0.1,						// Step size to divide feed movements into small G1 moves
 };
 
 // Internal properties
@@ -33,7 +33,7 @@ extension = "gcode";
 setCodePage("ascii");
 certificationLevel = 2;
 capabilities = CAPABILITY_JET;
-description = "CoreXY Plasma Cutter";
+description = "CoreXY Plasma Cutter THC";
 vendor = "Solhaga";
 useSmoothing = true;
 
@@ -64,8 +64,8 @@ allowedCircularPlanes	=	undefined;
 // Misc variables
 var powerState = false;
 var cutterOn;
-var currentXpos;
-var currentYpos;
+var currentXPos = 0;
+var currentYPos = 0;
 
 // Called in every new gcode file
 function onOpen() {
@@ -200,40 +200,50 @@ function rapidMovements(_x, _y, _z) {
   var y = yOutput.format(_y);
   var z = zOutput.format(_z);
 
-//  if(z) {
-//    f = fOutput.format(properties.travelSpeedZ);
-//    fOutput.reset();
-//    writeln("G1" + z + f);
-//  }
   if(x || y) {
     f = fOutput.format(properties._travelSpeedXY);
     fOutput.reset();
     writeln("G1" + x + y + f);
+    currentXPos = _x;
+    currentYPos = _y;
   }
   return;
 }
 
-// Linear movements
-// Divide into properties._thcSteps
-function linearMovements(_x, _y, _z, _feed) {
-  var x = xOutput.format(_x);
-  var y = yOutput.format(_y);
+// Linear feed movements
+// Divide G1 moves into properties._thcStepSize
+function linearMovements(_x, _y, _z, feed) {
+
   var z = zOutput.format(_z);
   var f = fOutput.format(properties._feedSpeed);
+ 
+  if (_x || _y) {
+    var distanceX = _x - currentXPos;
+    var distanceY = _y - currentYPos;
+    var distance = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
   
-  //if(x || y || z) {
-  //writeln("G1" + x + y + z + f);
-  if(x || y) {
-	writeln("G1" + x + y + f);
+    // Note, truncates the distance
+    var numberOfSteps = distance / properties._thcStepSize;
+    var stepSizeX = distanceX / numberOfSteps;
+    var stepSizeY = distanceY / numberOfSteps;
+  
+    for (var i = 0; i < numberOfSteps; ++i) {
+        var nextXPos = currentXPos + (i+1) * stepSizeX;
+        var nextYPos = currentYPos + (i+1) * stepSizeY;
+        var formatted_x = xOutput.format(nextXPos);
+        var formatted_y = yOutput.format(nextYPos);
+        writeln("G1" + formatted_x + formatted_y + f);
+    }
   }
-  currentXpos = x;
-  currentYpos = y;
+
+  currentXPos = _x;
+  currentYPos = _y;
   
   return;
 }
 
 // Circular movements
-function circularMovements(_clockwise, _cx, _cy, _cz, _x,	_y, _z, _feed) {
+function circularMovements(_clockwise, _cx, _cy, _cz, _x,	_y, _z, feed) {
   // Marlin supports arcs only on XY plane
   switch (getCircularPlane()) {
   case PLANE_XY:
