@@ -55,7 +55,7 @@ var	kOutput	=	createReferenceVariable({prefix:" K"},	xyzFormat);
 
 // Arc support variables
 minimumChordLength	=	spatial(0.01,	MM);
-minimumCircularRadius	=	spatial(0.5,	MM);	// Same values disables IJK
+minimumCircularRadius	=	spatial(1.0,	MM);	// Same values disables IJK
 maximumCircularRadius	=	spatial(1.5,	MM);	// Same values disables IJK
 minimumCircularSweep	=	toRad(0.01);
 maximumCircularSweep	=	toRad(180);
@@ -224,7 +224,7 @@ function linearMovements(_x, _y, _z, feed) {
     var distance = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
   
     // Note, truncates the distance
-    var numberOfSteps = distance / properties._thcStepSize;
+    var numberOfSteps = Math.floor(distance / properties._thcStepSize);
     var stepSizeX = distanceX / numberOfSteps;
     var stepSizeY = distanceY / numberOfSteps;
   
@@ -235,6 +235,16 @@ function linearMovements(_x, _y, _z, feed) {
         var formatted_y = yOutput.format(nextYPos);
         writeln("G1" + formatted_x + formatted_y + f);
     }
+    // Take care of any remainders
+     // If any of these are non-zero, write an extra writeln to get to the corrent endpoint
+     var remainingDistanceX = distanceX - (stepSizeX * numberOfSteps);
+     var remainingDistanceY = distanceY - (stepSizeY * numberOfSteps);
+     var formatted_x = xOutput.format(remainingDistanceX);
+     var formatted_y = yOutput.format(remainingDistanceY);
+    
+     if ((remainingDistanceX) || (remainingDistanceY)){
+        writeln("G1" + formatted_x + formatted_y + f);
+     }
   }
 
   currentXPos = _x;
