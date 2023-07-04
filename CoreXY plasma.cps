@@ -199,7 +199,6 @@ function writeComment(text) {
 function rapidMovements(_x, _y, _z) {
   var x = xOutput.format(_x);
   var y = yOutput.format(_y);
-  var z = zOutput.format(_z);
 
   if(x || y) {
     f = fOutput.format(properties._travelSpeedXY);
@@ -215,36 +214,38 @@ function rapidMovements(_x, _y, _z) {
 // Divide G1 moves into properties._thcStepSize
 function linearMovements(_x, _y, _z, feed) {
 
-  var z = zOutput.format(_z);
-  var f = fOutput.format(properties._feedSpeed);
- 
+   // Uncomment these two lines to bypass the divitions
+  //writeln("G1" + xOutput.format(_x) + yOutput.format(_y) + fOutput.format(properties._feedSpeed));
+  //return;
+
   if (_x || _y) {
     var distanceX = _x - currentXPos;
     var distanceY = _y - currentYPos;
     var distance = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
+
+    if (distance > properties._thcStepSize * 11) {  // Don't divide already small movements
   
-    // Note, truncates the distance
-    var numberOfSteps = Math.floor(distance / properties._thcStepSize);
-    var stepSizeX = distanceX / numberOfSteps;
-    var stepSizeY = distanceY / numberOfSteps;
+      // Note, truncates the distance
+      var numberOfSteps = Math.floor(distance / properties._thcStepSize);
+      var stepSizeX = distanceX / numberOfSteps;
+      var stepSizeY = distanceY / numberOfSteps;
   
-    for (var i = 0; i < numberOfSteps; ++i) {
-        var nextXPos = currentXPos + (i+1) * stepSizeX;
-        var nextYPos = currentYPos + (i+1) * stepSizeY;
-        var formatted_x = xOutput.format(nextXPos);
-        var formatted_y = yOutput.format(nextYPos);
-        writeln("G1" + formatted_x + formatted_y + f);
-    }
-    // Take care of any remainders
-     // If any of these are non-zero, write an extra writeln to get to the corrent endpoint
-     var remainingDistanceX = distanceX - (stepSizeX * numberOfSteps);
-     var remainingDistanceY = distanceY - (stepSizeY * numberOfSteps);
-     var formatted_x = xOutput.format(remainingDistanceX);
-     var formatted_y = yOutput.format(remainingDistanceY);
+      for (var i = 0; i < numberOfSteps; ++i) {
+          var nextXPos = currentXPos + (i+1) * stepSizeX;
+          var nextYPos = currentYPos + (i+1) * stepSizeY;
+          writeln("G1" + xOutput.format(nextXPos) + yOutput.format(nextYPos) + fOutput.format(properties._feedSpeed));
+      }
+
+      // Take care of any remainders
+      // If any of these are non-zero, write an extra writeln to get to the corrent endpoint
+      var remainingDistanceX = distanceX - (stepSizeX * numberOfSteps);
+      var remainingDistanceY = distanceY - (stepSizeY * numberOfSteps);
     
-     if ((remainingDistanceX) || (remainingDistanceY)){
-        writeln("G1" + formatted_x + formatted_y + f);
-     }
+      if ((remainingDistanceX) || (remainingDistanceY)){
+          writeln("G1" + xOutput.format(remainingDistanceX) + yOutput.format(remainingDistanceY) + fOutput.format(properties._feedSpeed));
+      }
+    }
+    else writeln("G1" + xOutput.format(_x) + yOutput.format(_y) + fOutput.format(properties._feedSpeed));
   }
 
   currentXPos = _x;
@@ -254,7 +255,7 @@ function linearMovements(_x, _y, _z, feed) {
 }
 
 // Circular movements
-function circularMovements(_clockwise, _cx, _cy, _cz, _x,	_y, _z, feed) {
+function circularMovements(_clockwise, _cx, _cy, _cz, _x, _y, _z, feed) {
   // Marlin supports arcs only on XY plane
   switch (getCircularPlane()) {
   case PLANE_XY:
