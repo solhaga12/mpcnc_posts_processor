@@ -19,12 +19,12 @@ properties = {
   cutterOn:  "M2106",                // GCode command to turn on the plasma
   cutterOff: "M2107",                // Gcode command to turn off the plasma
   _thcVoltage: 125,					// Set the V<thcVoltage> in V. M2106 parameter
-  _delay: 100,						// Set the D<delayTime> in ms. M2106 parameter
-  _cutHeight: 6.4,					// Set the H<cutHeight> in mm. M2106 parameter
-  _initialHeight: 6.4,				// Set the I<initialHeight> in mm. M2106 parameter
-  _feedSpeed: 4000,	      			// Feed speed in mm/minute
-  _travelSpeedXY: 2500,             // High speed for travel movements X & Y (mm/min)
-  travelSpeedZ: 900,                // High speed for travel movements Z (mm/min)
+  _delay: 400,						// Set the D<delayTime> in ms. M2106 parameter
+  _cutHeight: 1.5,					// Set the H<cutHeight> in mm. M2106 parameter
+  _initialHeight: 3.8,				// Set the I<initialHeight> in mm. M2106 parameter
+  _feedSpeed: 6400,	      			// Feed speed in mm/minute
+  _travelSpeedXY: 8400,             // High speed for travel movements X & Y (mm/min)
+  travelSpeedZ: 4400,                // High speed for travel movements Z (mm/min)
   _thcStepSize: 0.1,						// Step size to divide feed movements into small G1 moves
   _thcHeightIncrement: 0.1,						// Increment to lower or lift Z-axis for every G1 move. M2106 parameter.
 };
@@ -34,7 +34,7 @@ extension = "gcode";
 setCodePage("ascii");
 certificationLevel = 2;
 capabilities = CAPABILITY_JET;
-description = "CoreXY Plasma Cutter THC";
+description = "CoreXY Plasma Cutter";
 vendor = "Solhaga";
 useSmoothing = true;
 
