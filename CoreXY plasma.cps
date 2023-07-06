@@ -214,9 +214,9 @@ function rapidMovements(_x, _y, _z) {
 // Divide G1 moves into properties._thcStepSize
 function linearMovements(_x, _y, _z, feed) {
 
-   // Uncomment these two lines to bypass the divitions
-  //writeln("G1" + xOutput.format(_x) + yOutput.format(_y) + fOutput.format(properties._feedSpeed));
-  //return;
+  // Uncomment these two lines to bypass the divitions
+  writeln("G1" + xOutput.format(_x) + yOutput.format(_y) + fOutput.format(properties._feedSpeed));
+  return;
 
   if (_x || _y) {
     var distanceX = _x - currentXPos;
