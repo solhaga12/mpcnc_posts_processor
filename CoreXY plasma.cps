@@ -16,17 +16,13 @@ Some design points:
 
 // user-defined properties
 properties = {
-  cutterOn:  "M2106",                // GCode command to turn on the plasma
-  cutterOff: "M2107",                // Gcode command to turn off the plasma
   _thcVoltage: 125,					// Set the V<thcVoltage> in V. M2106 parameter
   _delay: 400,						// Set the D<delayTime> in ms. M2106 parameter
   _cutHeight: 1.5,					// Set the H<cutHeight> in mm. M2106 parameter
   _initialHeight: 3.8,				// Set the I<initialHeight> in mm. M2106 parameter
   _feedSpeed: 6400,	      			// Feed speed in mm/minute
-  _travelSpeedXY: 8400,             // High speed for travel movements X & Y (mm/min)
-  travelSpeedZ: 4400,                // High speed for travel movements Z (mm/min)
-  _thcStepSize: 0.1,						// Step size to divide feed movements into small G1 moves
-  _thcHeightIncrement: 0.1,						// Increment to lower or lift Z-axis for every G1 move. M2106 parameter.
+  // _thcStepSize: 0.1,						// Step size to divide feed movements into small G1 moves
+  // _thcHeightIncrement: 0.1,						// Increment to lower or lift Z-axis for every G1 move. M2106 parameter.
 };
 
 // Internal properties
@@ -37,6 +33,8 @@ capabilities = CAPABILITY_JET;
 description = "CoreXY Plasma Cutter";
 vendor = "Solhaga";
 useSmoothing = true;
+travelSpeedXY = 8400;             // High speed for travel movements X & Y (mm/min)
+travelSpeedZ =  4400;             // High speed for travel movements Z (mm/min)
 
 // Formats
 var xyzFormat = createFormat({decimals:3});
@@ -77,10 +75,10 @@ function onOpen() {
 // Called at end of gcode file
 function onClose() {
   writeln("M400");
-  writeln(properties.cutterOff);
+  writeln("M2107");
 
-  writeln("G0 Z50" + fOutput.format(properties.travelSpeedZ)); // Raise cut head.
-  writeln("G0 X0 Y0" + fOutput.format(properties._travelSpeedXY)); // Go to XY origin
+  writeln("G0 Z4" + fOutput.format(travelSpeedZ)); // Raise cut head.
+  writeln("G0 X0 Y0" + fOutput.format(travelSpeedXY)); // Go to XY origin
   
   // End message to LCD
   writeln("M117 Job end");
@@ -101,7 +99,8 @@ function onSection() {
   }
 
   // Cutter mode used for different thc voltages
-  cutterOn = properties.cutterOn + " V" + properties._thcVoltage + " D" + properties._delay + " H" + properties._cutHeight + " I" + properties._initialHeight + " T" + properties._thcHeightIncrement;
+  cutterOn = "M2106 V" + properties._thcVoltage + " D" + properties._delay + " H" + properties._cutHeight + " I" + properties._initialHeight;
+  // cutterOn = "M2106 V" + properties._thcVoltage + " D" + properties._delay + " H" + properties._cutHeight + " I" + properties._initialHeight + " T" + properties._thcHeightIncrement;
   writeComment(sectionComment + " - Plasma - Cutting mode: " + getParameter("operation:cuttingMode"));
 
   // Print min/max boundaries for each section
@@ -152,8 +151,8 @@ function onPower(power) {
 	  writeln("G28 Z");	// Z is at 4 after homing
       writeln(cutterOn);
     } else {
-	  writeln("M400");
-      writeln(properties.cutterOff);
+	    writeln("M400");
+      writeln("M2107");
     }
     powerState = power;
   }
@@ -201,7 +200,7 @@ function rapidMovements(_x, _y, _z) {
   var y = yOutput.format(_y);
 
   if(x || y) {
-    f = fOutput.format(properties._travelSpeedXY);
+    f = fOutput.format(travelSpeedXY);
     fOutput.reset();
     writeln("G1" + x + y + f);
     currentXPos = _x;
