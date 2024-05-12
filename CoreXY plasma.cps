@@ -33,7 +33,7 @@ capabilities = CAPABILITY_JET;
 description = "CoreXY Plasma Cutter";
 vendor = "Solhaga";
 useSmoothing = true;
-travelSpeedXY = 8400;             // High speed for travel movements X & Y (mm/min)
+travelSpeedXY = 6400;             // High speed for travel movements X & Y (mm/min)
 travelSpeedZ =  4400;             // High speed for travel movements Z (mm/min)
 
 // Formats
