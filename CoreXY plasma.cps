@@ -213,7 +213,7 @@ function rapidMovements(_x, _y, _z) {
 // Divide G1 moves into properties._thcStepSize
 function linearMovements(_x, _y, _z, feed) {
 
-  // Uncomment these two lines to bypass the divitions
+  // Uncomment these two lines to bypass the divisions
   writeln("G1" + xOutput.format(_x) + yOutput.format(_y) + fOutput.format(properties._feedSpeed));
   return;
 
