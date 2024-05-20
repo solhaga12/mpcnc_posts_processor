@@ -77,7 +77,7 @@ function onClose() {
   writeln("M400");
   writeln("M2107");
 
-  writeln("G0 Z4" + fOutput.format(travelSpeedZ)); // Raise cut head.
+  writeln("G0 Z10" + fOutput.format(travelSpeedZ)); // Raise cut head.
   writeln("G0 X0 Y0" + fOutput.format(travelSpeedXY)); // Go to XY origin
   
   // End message to LCD
